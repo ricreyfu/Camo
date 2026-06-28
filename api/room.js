@@ -1,8 +1,8 @@
 import { Redis } from '@upstash/redis';
 
 const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL,
-  token: process.env.UPSTASH_REDIS_REST_TOKEN,
+  url: process.env.KV_REST_API_URL,
+  token: process.env.KV_REST_API_TOKEN,
 });
 
 // Rooms auto-expire after 6 hours of inactivity so old games don't pile up.
@@ -21,10 +21,10 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  if (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN) {
+  if (!process.env.KV_REST_API_URL || !process.env.KV_REST_API_TOKEN) {
     return res.status(500).json({
       error: 'Database not connected',
-      detail: 'No Upstash Redis database is linked to this project yet. Go to your Vercel project → Storage → connect an Upstash database, then redeploy.'
+      detail: 'No Redis database is linked to this project yet, or env vars are missing. Check Vercel project → Settings → Environment Variables for KV_REST_API_URL and KV_REST_API_TOKEN, then redeploy.'
     });
   }
 
