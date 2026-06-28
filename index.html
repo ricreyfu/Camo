@@ -54,6 +54,12 @@
   .playerlist li{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line);font-size:15px;}
   .playerlist li:last-child{border-bottom:none;}
   .dot{width:8px;height:8px;border-radius:50%;background:var(--acid);display:inline-block;margin-right:8px;}
+  .pulse-dot{width:14px;height:14px;border-radius:50%;background:var(--acid);box-shadow:0 0 0 0 rgba(182,255,60,0.6);animation:pulse 1.6s infinite;}
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(182,255,60,0.5);}
+    70%{box-shadow:0 0 0 14px rgba(182,255,60,0);}
+    100%{box-shadow:0 0 0 0 rgba(182,255,60,0);}
+  }
   .center{text-align:center;}
   .reveal-box{
     background:linear-gradient(160deg,var(--panel2),var(--panel));border:1px solid var(--line);
@@ -63,6 +69,9 @@
   .reveal-box .hint{color:var(--dim);font-family:var(--font-mono);font-size:12px;text-transform:uppercase;letter-spacing:1.5px;}
   .reveal-box .category{color:var(--acid-dim);font-family:var(--font-mono);font-size:13px;letter-spacing:1px;}
   .reveal-box .word{font-family:var(--font-display);font-size:30px;margin-top:4px;}
+  .wordgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;width:100%;}
+  .gridcell{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:12px 8px;text-align:center;font-size:14px;font-family:var(--font-body);}
+  .gridcell.secret{border-color:var(--acid);background:#1c2a1e;color:var(--acid);font-weight:600;}
   .timer{font-family:var(--font-mono);font-size:54px;text-align:center;color:var(--acid);letter-spacing:2px;}
   .small{font-size:12px;color:var(--dim);}
   a.linklike{color:var(--acid);text-decoration:underline;cursor:pointer;}
@@ -80,7 +89,7 @@
 </head>
 <body>
 <div id="app"></div>
-
+ 
 <script>
 /* ============== BACKEND SYNC (real API, not window.storage) ============== */
 async function apiGetRoom(code){
@@ -104,7 +113,7 @@ async function apiSaveRoom(code, room){
     throw new Error(body.detail || body.error || ('Failed to save room (' + r.status + ')'));
   }
 }
-
+ 
 /* ============== DEFAULT WORD PACK ============== */
 const DEFAULT_PACK = {
   "Kitchen": ["Spatula","Toaster","Fridge","Whisk","Cutting board","Microwave","Saucepan","Colander"],
@@ -113,7 +122,7 @@ const DEFAULT_PACK = {
   "Animals": ["Giraffe","Octopus","Penguin","Kangaroo","Hedgehog","Falcon","Otter","Camel"],
   "Vacation": ["Beach resort","Ski lodge","Road trip","Cruise ship","Campsite","Safari","Theme park","City break"]
 };
-
+ 
 /* ============== STATE ============== */
 let state = {
   screen: "home",
@@ -130,10 +139,10 @@ let state = {
   errorMsg: null,
   lastSeenUpdatedAt: 0
 };
-
+ 
 function uid(){ return Math.random().toString(36).slice(2,9); }
 function code(){ return Math.random().toString(36).slice(2,6).toUpperCase(); }
-
+ 
 function freshRoom(hostId, hostName){
   return {
     players: [{id: hostId, name: hostName, host:true}],
@@ -148,7 +157,7 @@ function freshRoom(hostId, hostName){
     updatedAt: Date.now()
   };
 }
-
+ 
 /* ============== ONLINE SYNC ============== */
 async function pushRoom(){
   if(state.mode !== "online") return;
@@ -182,7 +191,7 @@ function startPolling(){
 function stopPolling(){
   if(state.pollHandle){ clearInterval(state.pollHandle); state.pollHandle = null; }
 }
-
+ 
 /* ============== GAME LOGIC ============== */
 function pickWord(room){
   const cats = room.activeCategories.filter(c => room.pack[c] && room.pack[c].length);
@@ -191,7 +200,7 @@ function pickWord(room){
   const word = words[Math.floor(Math.random()*words.length)];
   return {category:cat, word};
 }
-
+ 
 function startRound(){
   const room = state.room;
   const ids = room.players.map(p=>p.id);
@@ -199,30 +208,31 @@ function startRound(){
   const shuffled = [...ids].sort(()=>Math.random()-0.5);
   const chameleonIds = shuffled.slice(0, n);
   const {category, word} = pickWord(room);
-  room.round = { category, word, chameleonIds, discussSeconds: room.settings.discussSeconds };
+  const grid = [...room.pack[category]].sort(()=>Math.random()-0.5);
+  room.round = { category, word, grid, chameleonIds, discussSeconds: room.settings.discussSeconds };
   room.phase = "reveal";
   room.votes = {};
   room.timerStart = null;
   syncRoom();
 }
-
+ 
 function syncRoom(){
   if(state.mode === "online"){ pushRoom(); }
   render();
 }
-
+ 
 function beginDiscussion(){
   state.room.phase = "discuss";
   state.room.timerStart = Date.now();
   syncRoom();
 }
-
+ 
 function castVote(targetId){
   state.selectedVote = targetId;
   state.room.votes[state.playerId] = targetId;
   syncRoom();
 }
-
+ 
 function tallyAndReveal(){
   const room = state.room;
   const tally = {};
@@ -233,7 +243,7 @@ function tallyAndReveal(){
   room.lastResult = { accusedId: topId, tally };
   syncRoom();
 }
-
+ 
 function newRound(){
   state.room.phase = "lobby";
   state.room.round = null;
@@ -242,10 +252,10 @@ function newRound(){
   state.selectedVote = null;
   syncRoom();
 }
-
+ 
 /* ============== RENDER ============== */
 function el(html){ const d=document.createElement('div'); d.innerHTML=html.trim(); return d.firstChild; }
-
+ 
 function render(){
   const app = document.getElementById('app');
   app.innerHTML = "";
@@ -255,16 +265,20 @@ function render(){
   }
   let body;
   if(state.screen === "home") body = renderHome();
-  else if(state.screen === "lobby") body = renderLobby();
   else if(state.screen === "settings") body = renderSettings();
-  else if(state.room && state.room.phase === "reveal") body = renderReveal();
-  else if(state.room && state.room.phase === "discuss") body = renderDiscuss();
-  else if(state.room && state.room.phase === "vote") body = renderVote();
-  else if(state.room && state.room.phase === "result") body = renderResult();
-  else body = renderLobby();
+  else if(state.room){
+    const phase = state.room.phase;
+    if(phase === "reveal") body = renderReveal();
+    else if(phase === "discuss") body = renderDiscuss();
+    else if(phase === "vote") body = renderVote();
+    else if(phase === "result") body = renderResult();
+    else body = renderLobby();
+  } else {
+    body = renderHome();
+  }
   app.appendChild(body);
 }
-
+ 
 function brandHeader(){
   return el(`<div class="brand">
     <span class="mark">◈</span>
@@ -272,7 +286,7 @@ function brandHeader(){
     <span class="tag">${state.mode === "online" ? "Room " + (state.roomCode||"") : (state.mode === "local" ? "Pass &amp; Play" : "")}</span>
   </div>`);
 }
-
+ 
 /* ---- HOME ---- */
 function renderHome(){
   const wrap = el(`<div></div>`);
@@ -292,7 +306,7 @@ function renderHome(){
     </div>
   `);
   wrap.appendChild(card);
-
+ 
   card.querySelector('#hostOnlineBtn').onclick = async () => {
     const name = card.querySelector('#nameInput').value.trim() || "Host";
     state.playerName = name;
@@ -312,7 +326,7 @@ function renderHome(){
     state.screen = "lobby";
     render();
   };
-
+ 
   card.querySelector('#joinOnlineBtn').onclick = () => {
     const name = card.querySelector('#nameInput').value.trim() || "Player";
     state.playerName = name;
@@ -356,7 +370,7 @@ function renderHome(){
       render();
     };
   };
-
+ 
   card.querySelector('#localBtn').onclick = () => {
     state.mode = "local";
     state.playerId = "local-host";
@@ -366,15 +380,15 @@ function renderHome(){
     state.screen = "lobby";
     render();
   };
-
+ 
   return wrap;
 }
-
+ 
 /* ---- LOBBY ---- */
 function renderLobby(){
   const room = state.room;
   const wrap = el(`<div></div>`);
-
+ 
   if(state.mode === "online"){
     const codeCard = el(`
       <div class="card center">
@@ -384,13 +398,13 @@ function renderLobby(){
     `);
     wrap.appendChild(codeCard);
   }
-
+ 
   const playersCard = el(`<div class="card"><h2>Players (${room.players.length})</h2><ul class="playerlist" id="plist"></ul></div>`);
   const plist = playersCard.querySelector('#plist');
   room.players.forEach(p=>{
     plist.appendChild(el(`<li><span><span class="dot"></span>${p.name}${p.host?'<span class="badge-host">HOST</span>':''}</span></li>`));
   });
-
+ 
   if(state.mode === "local"){
     const addRow = el(`
       <div class="row" style="margin-top:10px;">
@@ -405,35 +419,51 @@ function renderLobby(){
     };
   }
   wrap.appendChild(playersCard);
-
-  const settingsSummary = el(`
-    <div class="card">
-      <h2>Round settings</h2>
-      <p class="muted">${room.settings.chameleons} chameleon${room.settings.chameleons>1?'s':''} · ${Math.round(room.settings.discussSeconds/60)} min discussion · ${room.activeCategories.length} category pack(s) active</p>
-      <button class="btn-ghost" id="openSettings" style="width:100%;margin-top:6px;">Customize game</button>
-    </div>
-  `);
-  wrap.appendChild(settingsSummary);
-  settingsSummary.querySelector('#openSettings').onclick = () => { state.screen="settings"; render(); };
-
+ 
   const canStart = room.players.length >= 3;
-  const startCard = el(`
-    <div class="card">
-      <button class="btn-primary" id="startBtn" style="width:100%;" ${canStart?'':'disabled'}>Start round</button>
-      ${canStart ? '' : '<p class="small" style="margin-top:8px;">Need at least 3 players to start.</p>'}
-    </div>
-  `);
-  startCard.querySelector('#startBtn').onclick = () => { if(canStart) startRound(); };
-  wrap.appendChild(startCard);
-
+ 
+  if(state.isHost || state.mode === "local"){
+    // HOST VIEW — full controls
+    const settingsSummary = el(`
+      <div class="card">
+        <h2>Round settings</h2>
+        <p class="muted">${room.settings.chameleons} chameleon${room.settings.chameleons>1?'s':''} · ${Math.round(room.settings.discussSeconds/60)} min discussion · ${room.activeCategories.length} category pack(s) active</p>
+        <button class="btn-ghost" id="openSettings" style="width:100%;margin-top:6px;">Customize game</button>
+      </div>
+    `);
+    wrap.appendChild(settingsSummary);
+    settingsSummary.querySelector('#openSettings').onclick = () => { state.screen="settings"; render(); };
+ 
+    const startCard = el(`
+      <div class="card">
+        <button class="btn-primary" id="startBtn" style="width:100%;" ${canStart?'':'disabled'}>Start round</button>
+        ${canStart ? '' : '<p class="small" style="margin-top:8px;">Need at least 3 players to start.</p>'}
+      </div>
+    `);
+    startCard.querySelector('#startBtn').onclick = () => { if(canStart) startRound(); };
+    wrap.appendChild(startCard);
+ 
+  } else {
+    // JOINER VIEW — read-only, waiting on host
+    const waitCard = el(`
+      <div class="card center" style="padding:30px 18px;">
+        <div class="pulse-dot" style="margin:0 auto 14px;"></div>
+        <h2>Waiting for the host</h2>
+        <p class="muted" style="margin-top:8px;">${room.settings.chameleons} chameleon${room.settings.chameleons>1?'s':''} · ${Math.round(room.settings.discussSeconds/60)} min discussion</p>
+        <p class="small" style="margin-top:10px;">The host will start the round once everyone's in.</p>
+      </div>
+    `);
+    wrap.appendChild(waitCard);
+  }
+ 
   return wrap;
 }
-
+ 
 /* ---- SETTINGS ---- */
 function renderSettings(){
   const room = state.room;
   const wrap = el(`<div></div>`);
-
+ 
   const ruleCard = el(`
     <div class="card">
       <h2>Rules</h2>
@@ -450,7 +480,7 @@ function renderSettings(){
     syncRoom();
   };
   wrap.appendChild(ruleCard);
-
+ 
   const catCard = el(`<div class="card"><h2>Category packs</h2><div id="catChips"></div></div>`);
   const chipsHolder = catCard.querySelector('#catChips');
   function redrawChips(){
@@ -479,7 +509,7 @@ function renderSettings(){
   }
   redrawChips();
   wrap.appendChild(catCard);
-
+ 
   const addCard = el(`
     <div class="card">
       <h2>Add or edit a category</h2>
@@ -503,24 +533,34 @@ function renderSettings(){
     redrawChips();
   };
   wrap.appendChild(addCard);
-
+ 
   const back = el(`<div class="card"><button class="btn-ghost" id="backLobby" style="width:100%;">← Back to lobby</button></div>`);
   back.querySelector('#backLobby').onclick = () => { state.screen="lobby"; render(); };
   wrap.appendChild(back);
-
+ 
   return wrap;
 }
-
+ 
 /* ---- REVEAL ---- */
+function buildGridHTML(round, isChameleon){
+  const cells = round.grid.map(w=>{
+    const isSecret = !isChameleon && w === round.word;
+    return `<div class="gridcell ${isSecret ? 'secret' : ''}">${w}</div>`;
+  }).join('');
+  const footer = isChameleon
+    ? `<div class="hint" style="margin-top:14px;color:var(--danger);">CATEGORY: ${round.category.toUpperCase()} — you're the chameleon. You don't know which word is real.</div>`
+    : `<div class="hint" style="margin-top:14px;">CATEGORY: ${round.category.toUpperCase()} — the highlighted word is the secret.</div>`;
+  return `<div class="wordgrid">${cells}</div>${footer}`;
+}
 function renderReveal(){
   const room = state.room;
   const wrap = el(`<div></div>`);
-
+ 
   if(state.mode === "online"){
     const isChameleon = room.round.chameleonIds.includes(state.playerId);
     const box = el(`
       <div class="card">
-        <h2>Your card</h2>
+        <h2>The board</h2>
         <div class="reveal-box" id="revealBox">
           <div class="hint">${state.myRevealOpen ? "tap to hide" : "tap to reveal — keep it secret"}</div>
         </div>
@@ -529,11 +569,7 @@ function renderReveal(){
     const rb = box.querySelector('#revealBox');
     function paint(){
       if(state.myRevealOpen){
-        if(isChameleon){
-          rb.innerHTML = `<div class="category">CATEGORY</div><div class="word">${room.round.category}</div><div class="hint" style="margin-top:10px;color:var(--danger);">You're the chameleon. You don't know the word.</div>`;
-        }else{
-          rb.innerHTML = `<div class="category">${room.round.category.toUpperCase()}</div><div class="word">${room.round.word}</div>`;
-        }
+        rb.innerHTML = buildGridHTML(room.round, isChameleon);
       }else{
         rb.innerHTML = `<div class="hint">tap to reveal — keep it secret</div>`;
       }
@@ -541,11 +577,11 @@ function renderReveal(){
     paint();
     rb.onclick = ()=>{ state.myRevealOpen = !state.myRevealOpen; paint(); };
     wrap.appendChild(box);
-
-    const readyCard = el(`<div class="card"><p class="muted">Once everyone has secretly checked their card, the host starts discussion.</p>${state.isHost?'<button class="btn-primary" id="goDiscuss" style="width:100%;">Start discussion</button>':'<p class="small">Waiting for host…</p>'}</div>`);
+ 
+    const readyCard = el(`<div class="card"><p class="muted">Once everyone has secretly checked the board, the host starts discussion.</p>${state.isHost?'<button class="btn-primary" id="goDiscuss" style="width:100%;">Start discussion</button>':'<p class="small">Waiting for host…</p>'}</div>`);
     if(state.isHost) readyCard.querySelector('#goDiscuss').onclick = beginDiscussion;
     wrap.appendChild(readyCard);
-
+ 
   } else {
     const idx = state.localRevealIndex;
     const players = room.players;
@@ -559,20 +595,14 @@ function renderReveal(){
       const box = el(`
         <div class="card">
           <h2>Pass to: ${p.name}</h2>
-          <div class="reveal-box" id="revealBox"><div class="hint">tap to reveal your card</div></div>
+          <div class="reveal-box" id="revealBox"><div class="hint">tap to reveal the board</div></div>
         </div>
       `);
       const rb = box.querySelector('#revealBox');
       let opened = false;
       rb.onclick = ()=>{
         opened = !opened;
-        if(opened){
-          rb.innerHTML = isChameleon
-            ? `<div class="category">CATEGORY</div><div class="word">${room.round.category}</div><div class="hint" style="margin-top:10px;color:var(--danger);">You're the chameleon!</div>`
-            : `<div class="category">${room.round.category.toUpperCase()}</div><div class="word">${room.round.word}</div>`;
-        } else {
-          rb.innerHTML = `<div class="hint">tap to reveal your card</div>`;
-        }
+        rb.innerHTML = opened ? buildGridHTML(room.round, isChameleon) : `<div class="hint">tap to reveal the board</div>`;
       };
       wrap.appendChild(box);
       const nextBtn = el(`<div class="card"><button class="btn-primary" id="nextPlayer" style="width:100%;">Got it — next player</button></div>`);
@@ -580,10 +610,10 @@ function renderReveal(){
       wrap.appendChild(nextBtn);
     }
   }
-
+ 
   return wrap;
 }
-
+ 
 /* ---- DISCUSS ---- */
 let discussTickHandle = null;
 function renderDiscuss(){
@@ -593,7 +623,7 @@ function renderDiscuss(){
   const remaining = Math.max(0, room.round.discussSeconds - elapsed);
   const mm = String(Math.floor(remaining/60)).padStart(2,'0');
   const ss = String(remaining%60).padStart(2,'0');
-
+ 
   const card = el(`
     <div class="card center">
       <h2>Discuss</h2>
@@ -604,7 +634,7 @@ function renderDiscuss(){
   `);
   card.querySelector('#goVote').onclick = () => { room.phase = "vote"; syncRoom(); };
   wrap.appendChild(card);
-
+ 
   clearInterval(discussTickHandle);
   discussTickHandle = setInterval(()=>{
     if(!state.room || state.room.phase !== "discuss"){ clearInterval(discussTickHandle); return; }
@@ -616,10 +646,10 @@ function renderDiscuss(){
     if(disp) disp.textContent = m2+":"+s2;
     if(r2<=0){ clearInterval(discussTickHandle); }
   }, 1000);
-
+ 
   return wrap;
 }
-
+ 
 /* ---- VOTE ---- */
 function renderVote(){
   const room = state.room;
@@ -633,7 +663,7 @@ function renderVote(){
     list.appendChild(opt);
   });
   wrap.appendChild(card);
-
+ 
   if(state.isHost || state.mode==="local"){
     const tallyCard = el(`<div class="card"><p class="muted">${Object.keys(room.votes).length} of ${room.players.length} votes in.</p><button class="btn-primary" id="reveal" style="width:100%;">Reveal result</button></div>`);
     tallyCard.querySelector('#reveal').onclick = tallyAndReveal;
@@ -641,7 +671,7 @@ function renderVote(){
   }
   return wrap;
 }
-
+ 
 /* ---- RESULT ---- */
 function renderResult(){
   const room = state.room;
@@ -650,12 +680,12 @@ function renderResult(){
   const accused = room.players.find(p=>p.id===accusedId);
   const chameleons = room.players.filter(p=>room.round.chameleonIds.includes(p.id));
   const caughtChameleon = chameleons.some(c=>c.id===accusedId);
-
+ 
   const banner = el(`<div class="result-banner ${caughtChameleon?'result-win':'result-lose'}">
     ${caughtChameleon ? "Caught! 🦎" : "The chameleon got away"}
   </div>`);
   wrap.appendChild(banner);
-
+ 
   const info = el(`
     <div class="card">
       <p class="muted">Group voted out: <strong>${accused?accused.name:'no one'}</strong></p>
@@ -665,16 +695,17 @@ function renderResult(){
     </div>
   `);
   wrap.appendChild(info);
-
+ 
   const again = el(`<div class="card"><button class="btn-primary" id="again" style="width:100%;">Next round</button></div>`);
   again.querySelector('#again').onclick = () => { state.localRevealIndex = 0; newRound(); };
   wrap.appendChild(again);
-
+ 
   return wrap;
 }
-
+ 
 /* ============== INIT ============== */
 render();
 </script>
 </body>
 </html>
+ 
