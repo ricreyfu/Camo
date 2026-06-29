@@ -3,25 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Camo</title>
+<title>Camo 3D</title>
 <style>
   :root{
-    --bg:#0e1410;
-    --panel:#161f19;
-    --panel2:#1d2a22;
-    --line:#2a3a30;
-    --ink:#eaf2ec;
-    --dim:#8aa092;
-    --acid:#b6ff3c;
-    --acid-dim:#7fae2a;
-    --danger:#ff5d5d;
-    --font-display: "Iowan Old Style", "Palatino Linotype", Georgia, serif;
-    --font-body: "Avenir Next", "Segoe UI", system-ui, sans-serif;
-    --font-mono: "JetBrains Mono", "Courier New", monospace;
+    --bg:#0e1410; --panel:#161f19; --panel2:#1d2a22; --line:#2a3a30;
+    --ink:#eaf2ec; --dim:#8aa092; --acid:#b6ff3c; --acid-dim:#7fae2a; --danger:#ff5d5d;
+    --font-display:"Iowan Old Style","Palatino Linotype",Georgia,serif;
+    --font-body:"Avenir Next","Segoe UI",system-ui,sans-serif;
+    --font-mono:"JetBrains Mono","Courier New",monospace;
   }
   *{box-sizing:border-box;}
-  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);min-height:100vh;}
-  #app{max-width:560px;margin:0 auto;padding:20px 18px 60px;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);min-height:100vh;overflow-x:hidden;}
+  #ui{max-width:560px;margin:0 auto;padding:20px 18px 60px;}
   h1,h2,h3{font-family:var(--font-display);font-weight:600;margin:0;}
   .brand{display:flex;align-items:baseline;gap:10px;margin-bottom:22px;}
   .brand .mark{font-size:30px;color:var(--acid);}
@@ -30,261 +23,194 @@
   .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:14px;}
   .card h2{font-size:19px;margin-bottom:10px;}
   label{display:block;font-size:12px;color:var(--dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;margin-top:14px;font-family:var(--font-mono);}
-  input[type=text],input[type=number],select,textarea{
-    width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--ink);
-    border-radius:8px;padding:10px 12px;font-size:15px;font-family:var(--font-body);
-  }
-  textarea{min-height:90px;resize:vertical;font-family:var(--font-mono);font-size:13px;}
-  button{
-    font-family:var(--font-body);font-weight:600;border:none;border-radius:9px;padding:12px 16px;
-    font-size:15px;cursor:pointer;transition:transform .12s ease, opacity .12s ease;
-  }
+  input[type=text],input[type=number]{width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:10px 12px;font-size:15px;font-family:var(--font-body);}
+  button{font-family:var(--font-body);font-weight:600;border:none;border-radius:9px;padding:12px 16px;font-size:15px;cursor:pointer;}
   button:active{transform:scale(0.97);}
   button:disabled{opacity:0.4;cursor:not-allowed;}
   .btn-primary{background:var(--acid);color:#0e1410;}
-  .btn-primary:hover{opacity:0.92;}
   .btn-ghost{background:transparent;color:var(--ink);border:1px solid var(--line);}
-  .btn-ghost:hover{border-color:var(--acid-dim);}
-  .btn-danger{background:transparent;color:var(--danger);border:1px solid #4a2222;}
   .row{display:flex;gap:10px;}
   .row > *{flex:1;}
   .pill{display:inline-block;background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-family:var(--font-mono);font-size:13px;color:var(--acid);}
   .muted{color:var(--dim);font-size:13px;line-height:1.5;}
+  .small{font-size:12px;color:var(--dim);}
   .playerlist{list-style:none;margin:10px 0 0;padding:0;}
   .playerlist li{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line);font-size:15px;}
   .playerlist li:last-child{border-bottom:none;}
   .dot{width:8px;height:8px;border-radius:50%;background:var(--acid);display:inline-block;margin-right:8px;}
-  .pulse-dot{width:14px;height:14px;border-radius:50%;background:var(--acid);box-shadow:0 0 0 0 rgba(182,255,60,0.6);animation:pulse 1.6s infinite;}
-  @keyframes pulse{
-    0%{box-shadow:0 0 0 0 rgba(182,255,60,0.5);}
-    70%{box-shadow:0 0 0 14px rgba(182,255,60,0);}
-    100%{box-shadow:0 0 0 0 rgba(182,255,60,0);}
-  }
-  .center{text-align:center;}
-  .reveal-box{
-    background:linear-gradient(160deg,var(--panel2),var(--panel));border:1px solid var(--line);
-    border-radius:16px;padding:34px 18px;text-align:center;margin:16px 0;cursor:pointer;user-select:none;
-    min-height:160px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
-  }
-  .reveal-box .hint{color:var(--dim);font-family:var(--font-mono);font-size:12px;text-transform:uppercase;letter-spacing:1.5px;}
-  .reveal-box .category{color:var(--acid-dim);font-family:var(--font-mono);font-size:13px;letter-spacing:1px;}
-  .reveal-box .word{font-family:var(--font-display);font-size:30px;margin-top:4px;}
-  .wordgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;width:100%;}
-  .gridcell{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:12px 8px;text-align:center;font-size:14px;font-family:var(--font-body);}
-  .gridcell.secret{border-color:var(--acid);background:#1c2a1e;color:var(--acid);font-weight:600;}
-  .timer{font-family:var(--font-mono);font-size:54px;text-align:center;color:var(--acid);letter-spacing:2px;}
-  .small{font-size:12px;color:var(--dim);}
-  a.linklike{color:var(--acid);text-decoration:underline;cursor:pointer;}
-  .catchip{display:inline-flex;align-items:center;gap:6px;background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:5px 10px;margin:3px;font-size:13px;}
-  .catchip button{background:none;border:none;color:var(--danger);padding:0;font-size:13px;cursor:pointer;}
+  .dot.caught{background:var(--danger);}
   .badge-host{font-family:var(--font-mono);font-size:10px;background:var(--acid);color:#0e1410;border-radius:5px;padding:2px 6px;margin-left:6px;}
-  .voteopt{display:flex;align-items:center;justify-content:space-between;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px;cursor:pointer;}
-  .voteopt.selected{border-color:var(--acid);background:#1c2a1e;}
+  .badge-role{font-family:var(--font-mono);font-size:10px;border-radius:5px;padding:2px 6px;margin-left:6px;}
+  .badge-seeker{background:var(--danger);color:#1a0c0c;}
+  .badge-hider{background:var(--acid-dim);color:#0e1410;}
+  .center{text-align:center;}
+  .pulse-dot{width:14px;height:14px;border-radius:50%;background:var(--acid);box-shadow:0 0 0 0 rgba(182,255,60,.6);animation:pulse 1.6s infinite;margin:0 auto 14px;}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(182,255,60,.5);}70%{box-shadow:0 0 0 14px rgba(182,255,60,0);}100%{box-shadow:0 0 0 0 rgba(182,255,60,0);}}
+  .swatch-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px;}
+  .swatch{aspect-ratio:1;border-radius:10px;border:2px solid var(--line);cursor:pointer;}
+  .swatch.selected{border-color:var(--acid);box-shadow:0 0 0 2px var(--acid);}
+  .pose-row{display:flex;gap:8px;margin-top:8px;}
+  .pose-btn{flex:1;background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:10px;text-align:center;cursor:pointer;font-size:13px;}
+  .pose-btn.selected{border-color:var(--acid);color:var(--acid);}
+  .timer{font-family:var(--font-mono);font-size:40px;text-align:center;color:var(--acid);letter-spacing:2px;}
   .result-banner{font-family:var(--font-display);font-size:24px;text-align:center;padding:14px;border-radius:12px;margin-bottom:12px;}
   .result-win{background:#1c2a1e;border:1px solid var(--acid-dim);color:var(--acid);}
   .result-lose{background:#2a1c1c;border:1px solid #5a2a2a;color:var(--danger);}
   .error-banner{background:#2a1c1c;border:1px solid #5a2a2a;color:var(--danger);padding:10px 14px;border-radius:10px;margin-bottom:14px;font-size:13px;}
   ::placeholder{color:#566054;}
+
+  /* ---- 3D GAME OVERLAY ---- */
+  #gameWrap{position:fixed;inset:0;display:none;background:#000;}
+  #gameCanvas{width:100%;height:100%;display:block;}
+  #hud{position:absolute;inset:0;pointer-events:none;font-family:var(--font-mono);}
+  #hudTop{position:absolute;top:14px;left:14px;right:14px;display:flex;justify-content:space-between;align-items:flex-start;}
+  #hudTimer{background:rgba(14,20,16,0.8);border:1px solid var(--line);border-radius:10px;padding:8px 16px;color:var(--acid);font-size:22px;}
+  #hudRole{background:rgba(14,20,16,0.8);border:1px solid var(--line);border-radius:10px;padding:8px 14px;color:var(--ink);font-size:13px;text-align:right;}
+  #crosshair{position:absolute;top:50%;left:50%;width:8px;height:8px;margin:-4px;border:2px solid var(--acid);border-radius:50%;}
+  #hudBottom{position:absolute;bottom:14px;left:14px;right:14px;text-align:center;color:var(--dim);font-size:12px;background:rgba(14,20,16,0.7);border-radius:8px;padding:6px;}
+  #clickToPlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(14,20,16,0.85);color:var(--ink);font-family:var(--font-body);font-size:16px;cursor:pointer;pointer-events:all;text-align:center;flex-direction:column;gap:10px;}
+  #clickToPlay .big{font-family:var(--font-display);font-size:24px;color:var(--acid);}
+  #exitBtn{position:absolute;top:14px;left:50%;transform:translateX(-50%);background:rgba(42,20,20,0.85);color:var(--danger);border:1px solid #5a2a2a;border-radius:8px;padding:6px 14px;font-size:12px;pointer-events:all;cursor:pointer;display:none;}
 </style>
 </head>
 <body>
-<div id="app"></div>
+<div id="ui"></div>
 
+<div id="gameWrap">
+  <canvas id="gameCanvas"></canvas>
+  <div id="hud">
+    <div id="hudTop">
+      <div id="hudTimer">--:--</div>
+      <div id="hudRole">—</div>
+    </div>
+    <div id="crosshair"></div>
+    <div id="hudBottom">WASD to move · Mouse to look · Click to tag</div>
+  </div>
+  <button id="exitBtn">Leave round</button>
+  <div id="clickToPlay">
+    <div class="big">Click to enter the room</div>
+    <div>WASD to move, mouse to look around</div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
-/* ============== BACKEND SYNC (real API, not window.storage) ============== */
+/* ============== BACKEND SYNC ============== */
 async function apiGetRoom(code){
   const r = await fetch('/api/room?code=' + encodeURIComponent(code));
   if(r.status === 404) return null;
-  if(!r.ok){
-    const body = await r.json().catch(()=>({}));
-    throw new Error(body.detail || body.error || ('Failed to load room (' + r.status + ')'));
-  }
-  const data = await r.json();
-  return data.room;
+  if(!r.ok){ const b = await r.json().catch(()=>({})); throw new Error(b.detail || b.error || ('Failed ('+r.status+')')); }
+  const d = await r.json();
+  return d.room;
 }
 async function apiSaveRoom(code, room){
-  const r = await fetch('/api/room', {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({ code, room })
-  });
-  if(!r.ok){
-    const body = await r.json().catch(()=>({}));
-    throw new Error(body.detail || body.error || ('Failed to save room (' + r.status + ')'));
-  }
+  const r = await fetch('/api/room', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({code, room}) });
+  if(!r.ok){ const b = await r.json().catch(()=>({})); throw new Error(b.detail || b.error || ('Failed ('+r.status+')')); }
 }
 
-/* ============== DEFAULT WORD PACK ============== */
-const DEFAULT_PACK = {
-  "Kitchen": ["Spatula","Toaster","Fridge","Whisk","Cutting board","Microwave","Saucepan","Colander"],
-  "Movies": ["The Godfather","Inception","Titanic","Jaws","Frozen","Alien","Up","Jurassic Park"],
-  "Sports": ["Tennis","Cricket","Basketball","Golf","Boxing","Surfing","Rugby","Bowling"],
-  "Animals": ["Giraffe","Octopus","Penguin","Kangaroo","Hedgehog","Falcon","Otter","Camel"],
-  "Vacation": ["Beach resort","Ski lodge","Road trip","Cruise ship","Campsite","Safari","Theme park","City break"]
-};
+/* ============== MAP / PALETTE DEFINITION ==============
+   One simple rectangular room. Walls + props each have a distinct color,
+   forming the palette players sample from to camouflage themselves. */
+const ROOM_SIZE = 26;          // floor is ROOM_SIZE x ROOM_SIZE
+const WALL_HEIGHT = 6;
+const PALETTE = [
+  {name:"Wall — Brick Red",   hex:0xb5453b},
+  {name:"Wall — Slate Blue",  hex:0x3b5b8c},
+  {name:"Wall — Moss Green",  hex:0x4f7a4a},
+  {name:"Wall — Sand",        hex:0xc9a96b},
+  {name:"Floor — Concrete",   hex:0x8b8d86},
+  {name:"Crate — Orange",     hex:0xd97b32},
+  {name:"Crate — Violet",     hex:0x7a4f9c},
+  {name:"Crate — Teal",       hex:0x2f9c92},
+  {name:"Plain White",        hex:0xf2f2f2}
+];
+const PROPS = [
+  // x, z, size, colorHex
+  {x:-9, z:-9, s:2.4, hex:0xd97b32},
+  {x: 9, z:-9, s:2.0, hex:0x7a4f9c},
+  {x:-9, z: 9, s:2.2, hex:0x2f9c92},
+  {x: 9, z: 9, s:2.6, hex:0xd97b32},
+  {x: 0, z:-6, s:1.8, hex:0x7a4f9c},
+  {x: 4, z: 4, s:1.6, hex:0x2f9c92},
+];
 
 /* ============== STATE ============== */
 let state = {
-  screen: "home",
-  mode: null,            // "local" or "online"
-  roomCode: null,
-  playerId: null,
-  playerName: "",
-  isHost: false,
-  room: null,
-  myRevealOpen: false,
-  selectedVote: null,
-  pollHandle: null,
-  localRevealIndex: 0,
-  errorMsg: null,
-  lastSeenUpdatedAt: 0
+  screen:"home", mode:null, roomCode:null, playerId:null, playerName:"",
+  isHost:false, room:null, errorMsg:null, lastSeenUpdatedAt:0, pollHandle:null,
+  prepColor: PALETTE[8].hex, prepPose:"stand"
 };
-
 function uid(){ return Math.random().toString(36).slice(2,9); }
-function code(){ return Math.random().toString(36).slice(2,6).toUpperCase(); }
+function code(){ return Math.random().toString(36).slice(2,4).toUpperCase() + Math.random().toString(36).slice(2,4).toUpperCase(); }
 
 function freshRoom(hostId, hostName){
   return {
-    players: [{id: hostId, name: hostName, host:true}],
-    settings: { chameleons: 1, discussSeconds: 180 },
-    pack: JSON.parse(JSON.stringify(DEFAULT_PACK)),
-    activeCategories: Object.keys(DEFAULT_PACK),
-    phase: "lobby",
-    round: null,
-    votes: {},
-    timerStart: null,
-    lastResult: null,
+    players: { [hostId]: { name:hostName, host:true, role:null, color:PALETTE[8].hex, pose:"stand",
+      x:0, y:0, z:0, yaw:0, caught:false } },
+    settings: { seekers:1, roundSeconds:90 },
+    phase:"lobby",          // lobby, prep, seek, result
+    prepUntil:null, seekUntil:null,
     updatedAt: Date.now()
   };
 }
 
-/* ============== ONLINE SYNC ============== */
+/* ============== SYNC ============== */
 async function pushRoom(){
-  if(state.mode !== "online") return;
+  if(state.mode!=="online") return;
   state.room.updatedAt = Date.now();
   state.lastSeenUpdatedAt = state.room.updatedAt;
-  try{
-    await apiSaveRoom(state.roomCode, state.room);
-    state.errorMsg = null;
-  }catch(e){
-    state.errorMsg = "Connection hiccup — retrying… (" + e.message + ")";
-  }
+  try{ await apiSaveRoom(state.roomCode, state.room); state.errorMsg=null; }
+  catch(e){ state.errorMsg = "Connection hiccup: " + e.message; }
 }
 async function pullRoom(){
-  if(state.mode !== "online") return;
+  if(state.mode!=="online") return;
   try{
     const incoming = await apiGetRoom(state.roomCode);
     if(incoming && incoming.updatedAt >= state.lastSeenUpdatedAt){
       state.room = incoming;
       state.lastSeenUpdatedAt = incoming.updatedAt;
-      render();
+      onRoomUpdated();
     }
     state.errorMsg = null;
-  }catch(e){
-    state.errorMsg = "Connection hiccup — retrying… (" + e.message + ")";
-  }
+  }catch(e){ state.errorMsg = "Connection hiccup: " + e.message; }
 }
-function startPolling(){
-  stopPolling();
-  state.pollHandle = setInterval(pullRoom, 1500);
-}
-function stopPolling(){
-  if(state.pollHandle){ clearInterval(state.pollHandle); state.pollHandle = null; }
+function startPolling(){ stopPolling(); state.pollHandle = setInterval(pullRoom, 1200); }
+function stopPolling(){ if(state.pollHandle){ clearInterval(state.pollHandle); state.pollHandle=null; } }
+
+function onRoomUpdated(){
+  if(game.active) return; // positions are read live from state.room each frame during play
+  renderUI();
+  maybeEnterFromPhase();
 }
 
-/* ============== GAME LOGIC ============== */
-function pickWord(room){
-  const cats = room.activeCategories.filter(c => room.pack[c] && room.pack[c].length);
-  const cat = cats[Math.floor(Math.random()*cats.length)];
-  const words = room.pack[cat];
-  const word = words[Math.floor(Math.random()*words.length)];
-  return {category:cat, word};
-}
-
-function startRound(){
-  const room = state.room;
-  const ids = room.players.map(p=>p.id);
-  const n = Math.min(room.settings.chameleons, Math.max(1, ids.length-1));
-  const shuffled = [...ids].sort(()=>Math.random()-0.5);
-  const chameleonIds = shuffled.slice(0, n);
-  const {category, word} = pickWord(room);
-  const grid = [...room.pack[category]].sort(()=>Math.random()-0.5);
-  room.round = { category, word, grid, chameleonIds, discussSeconds: room.settings.discussSeconds };
-  room.phase = "reveal";
-  room.votes = {};
-  room.timerStart = null;
-  syncRoom();
-}
-
-function syncRoom(){
-  if(state.mode === "online"){ pushRoom(); }
-  render();
-}
-
-function beginDiscussion(){
-  state.room.phase = "discuss";
-  state.room.timerStart = Date.now();
-  syncRoom();
-}
-
-function castVote(targetId){
-  state.selectedVote = targetId;
-  state.room.votes[state.playerId] = targetId;
-  syncRoom();
-}
-
-function tallyAndReveal(){
-  const room = state.room;
-  const tally = {};
-  Object.values(room.votes).forEach(v=>{ tally[v]=(tally[v]||0)+1; });
-  let topId=null, topCount=-1;
-  Object.entries(tally).forEach(([id,c])=>{ if(c>topCount){topCount=c; topId=id;} });
-  room.phase = "result";
-  room.lastResult = { accusedId: topId, tally };
-  syncRoom();
-}
-
-function newRound(){
-  state.room.phase = "lobby";
-  state.room.round = null;
-  state.room.votes = {};
-  state.room.lastResult = null;
-  state.selectedVote = null;
-  syncRoom();
-}
-
-/* ============== RENDER ============== */
+/* ============== UI RENDERING (lobby / settings / menus) ============== */
 function el(html){ const d=document.createElement('div'); d.innerHTML=html.trim(); return d.firstChild; }
 
-function render(){
-  const app = document.getElementById('app');
-  app.innerHTML = "";
-  app.appendChild(brandHeader());
-  if(state.errorMsg){
-    app.appendChild(el(`<div class="error-banner">${state.errorMsg}</div>`));
-  }
+function renderUI(){
+  document.getElementById('gameWrap').style.display = (state.screen==="ingame") ? "block" : "none";
+  const ui = document.getElementById('ui');
+  ui.style.display = (state.screen==="ingame") ? "none" : "block";
+  if(state.screen==="ingame") return;
+
+  ui.innerHTML = "";
+  ui.appendChild(brandHeader());
+  if(state.errorMsg) ui.appendChild(el(`<div class="error-banner">${state.errorMsg}</div>`));
+
   let body;
-  if(state.screen === "home") body = renderHome();
-  else if(state.screen === "settings") body = renderSettings();
+  if(state.screen==="home") body = renderHome();
+  else if(state.screen==="settings") body = renderSettings();
   else if(state.room){
     const phase = state.room.phase;
-    if(phase === "reveal") body = renderReveal();
-    else if(phase === "discuss") body = renderDiscuss();
-    else if(phase === "vote") body = renderVote();
-    else if(phase === "result") body = renderResult();
+    if(phase==="prep") body = renderPrep();
+    else if(phase==="result") body = renderResult();
     else body = renderLobby();
-  } else {
-    body = renderHome();
-  }
-  app.appendChild(body);
-}
+  } else body = renderHome();
 
+  ui.appendChild(body);
+}
 function brandHeader(){
-  return el(`<div class="brand">
-    <span class="mark">◈</span>
-    <span class="name">Camo</span>
-    <span class="tag">${state.mode === "online" ? "Room " + (state.roomCode||"") : (state.mode === "local" ? "Pass &amp; Play" : "")}</span>
-  </div>`);
+  return el(`<div class="brand"><span class="mark">◈</span><span class="name">Camo 3D</span>
+    <span class="tag">${state.mode==="online" ? "Room "+(state.roomCode||"") : ""}</span></div>`);
 }
 
 /* ---- HOME ---- */
@@ -292,42 +218,29 @@ function renderHome(){
   const wrap = el(`<div></div>`);
   const card = el(`
     <div class="card">
-      <h2>Blend in or get caught</h2>
-      <p class="muted">One of you doesn't know the secret word. Everyone else does. Talk it out, vote out the chameleon — and if you catch them, they get one shot to guess the word and steal it back.</p>
+      <h2>Paint to disappear</h2>
+      <p class="muted">A simplified, browser-friendly take on the paint-and-hide game. Sample a color from the room, pick a pose, and freeze. The seeker moves around in 3D and has to actually spot you.</p>
       <label>Your name</label>
       <input type="text" id="nameInput" placeholder="e.g. Robin" />
       <div class="row" style="margin-top:18px;">
-        <button class="btn-primary" id="hostOnlineBtn">Host online room</button>
-        <button class="btn-ghost" id="joinOnlineBtn">Join with code</button>
-      </div>
-      <div style="margin-top:10px;">
-        <button class="btn-ghost" id="localBtn" style="width:100%;">Play pass-&amp;-play on this device</button>
+        <button class="btn-primary" id="hostBtn">Host room</button>
+        <button class="btn-ghost" id="joinBtn">Join with code</button>
       </div>
     </div>
   `);
   wrap.appendChild(card);
 
-  card.querySelector('#hostOnlineBtn').onclick = async () => {
+  card.querySelector('#hostBtn').onclick = async () => {
     const name = card.querySelector('#nameInput').value.trim() || "Host";
-    state.playerName = name;
-    state.playerId = uid();
-    state.isHost = true;
-    state.mode = "online";
-    state.roomCode = code();
-    state.room = freshRoom(state.playerId, name);
+    state.playerName = name; state.playerId = uid(); state.isHost = true; state.mode = "online";
+    state.roomCode = code(); state.room = freshRoom(state.playerId, name);
     state.lastSeenUpdatedAt = state.room.updatedAt;
-    try{
-      await apiSaveRoom(state.roomCode, state.room);
-    }catch(e){
-      alert("Couldn't create the room. Check that the Vercel KV database is connected. Details: " + e.message);
-      return;
-    }
-    startPolling();
-    state.screen = "lobby";
-    render();
+    try{ await apiSaveRoom(state.roomCode, state.room); }
+    catch(e){ alert("Couldn't create the room: " + e.message); return; }
+    startPolling(); state.screen="lobby"; renderUI();
   };
 
-  card.querySelector('#joinOnlineBtn').onclick = () => {
+  card.querySelector('#joinBtn').onclick = () => {
     const name = card.querySelector('#nameInput').value.trim() || "Player";
     state.playerName = name;
     const joinCard = el(`
@@ -336,52 +249,28 @@ function renderHome(){
         <label>Room code</label>
         <input type="text" id="codeInput" placeholder="e.g. ZK3Q" style="text-transform:uppercase;" />
         <button class="btn-primary" id="confirmJoin" style="margin-top:14px;width:100%;">Join</button>
-        <p class="small" style="margin-top:10px;"><a class="linklike" id="backHome">← back</a></p>
+        <p class="small" style="margin-top:10px;"><a id="backHome" style="color:var(--acid);cursor:pointer;text-decoration:underline;">← back</a></p>
       </div>
     `);
     wrap.replaceChild(joinCard, card);
-    joinCard.querySelector('#backHome').onclick = () => { state.screen="home"; render(); };
+    joinCard.querySelector('#backHome').onclick = () => { state.screen="home"; renderUI(); };
     joinCard.querySelector('#confirmJoin').onclick = async () => {
       const c = joinCard.querySelector('#codeInput').value.trim().toUpperCase();
-      if(!c){ return; }
+      if(!c) return;
       let room;
-      try{
-        room = await apiGetRoom(c);
-      }catch(e){
-        alert("Couldn't reach the room server: " + e.message);
-        return;
-      }
-      if(!room){ alert("No room found with that code. Double check it with your host."); return; }
-      state.roomCode = c;
-      state.room = room;
-      state.playerId = uid();
-      state.isHost = false;
-      state.mode = "online";
-      state.room.players.push({id: state.playerId, name: state.playerName, host:false});
+      try{ room = await apiGetRoom(c); }
+      catch(e){ alert("Couldn't reach server: " + e.message); return; }
+      if(!room){ alert("No room found with that code."); return; }
+      state.roomCode = c; state.room = room; state.playerId = uid(); state.isHost = false; state.mode = "online";
+      state.room.players[state.playerId] = { name:state.playerName, host:false, role:null, color:PALETTE[8].hex,
+        pose:"stand", x:0,y:0,z:0, yaw:0, caught:false };
       state.room.updatedAt = Date.now();
       state.lastSeenUpdatedAt = state.room.updatedAt;
-      try{
-        await apiSaveRoom(state.roomCode, state.room);
-      }catch(e){
-        alert("Couldn't join the room: " + e.message);
-        return;
-      }
-      startPolling();
-      state.screen = "lobby";
-      render();
+      try{ await apiSaveRoom(state.roomCode, state.room); }
+      catch(e){ alert("Couldn't join: " + e.message); return; }
+      startPolling(); state.screen="lobby"; renderUI();
     };
   };
-
-  card.querySelector('#localBtn').onclick = () => {
-    state.mode = "local";
-    state.playerId = "local-host";
-    state.isHost = true;
-    state.room = freshRoom(state.playerId, "Host");
-    state.room.players = [];
-    state.screen = "lobby";
-    render();
-  };
-
   return wrap;
 }
 
@@ -389,74 +278,41 @@ function renderHome(){
 function renderLobby(){
   const room = state.room;
   const wrap = el(`<div></div>`);
+  const codeCard = el(`<div class="card center"><p class="small">Share this code so friends can join</p>
+    <div class="pill" style="font-size:20px;padding:8px 18px;">${state.roomCode}</div></div>`);
+  wrap.appendChild(codeCard);
 
-  if(state.mode === "online"){
-    const codeCard = el(`
-      <div class="card center">
-        <p class="small">Share this code so friends can join</p>
-        <div class="pill" style="font-size:20px;padding:8px 18px;">${state.roomCode}</div>
-      </div>
-    `);
-    wrap.appendChild(codeCard);
-  }
-
-  const playersCard = el(`<div class="card"><h2>Players (${room.players.length})</h2><ul class="playerlist" id="plist"></ul></div>`);
+  const ids = Object.keys(room.players);
+  const playersCard = el(`<div class="card"><h2>Players (${ids.length})</h2><ul class="playerlist" id="plist"></ul></div>`);
   const plist = playersCard.querySelector('#plist');
-  room.players.forEach(p=>{
+  ids.forEach(id=>{
+    const p = room.players[id];
     plist.appendChild(el(`<li><span><span class="dot"></span>${p.name}${p.host?'<span class="badge-host">HOST</span>':''}</span></li>`));
   });
-
-  if(state.mode === "local"){
-    const addRow = el(`
-      <div class="row" style="margin-top:10px;">
-        <input type="text" id="localName" placeholder="Add a player name" />
-        <button class="btn-ghost" id="addLocal">Add</button>
-      </div>
-    `);
-    playersCard.appendChild(addRow);
-    addRow.querySelector('#addLocal').onclick = () => {
-      const v = addRow.querySelector('#localName').value.trim();
-      if(v){ room.players.push({id: uid(), name:v, host: room.players.length===0}); render(); }
-    };
-  }
   wrap.appendChild(playersCard);
 
-  const canStart = room.players.length >= 3;
-
-  if(state.isHost || state.mode === "local"){
-    // HOST VIEW — full controls
-    const settingsSummary = el(`
+  const canStart = ids.length >= 2;
+  if(state.isHost){
+    const settingsCard = el(`
       <div class="card">
         <h2>Round settings</h2>
-        <p class="muted">${room.settings.chameleons} chameleon${room.settings.chameleons>1?'s':''} · ${Math.round(room.settings.discussSeconds/60)} min discussion · ${room.activeCategories.length} category pack(s) active</p>
+        <p class="muted">${room.settings.seekers} seeker${room.settings.seekers>1?'s':''} · ${Math.round(room.settings.roundSeconds/60*10)/10} min round</p>
         <button class="btn-ghost" id="openSettings" style="width:100%;margin-top:6px;">Customize game</button>
       </div>
     `);
-    wrap.appendChild(settingsSummary);
-    settingsSummary.querySelector('#openSettings').onclick = () => { state.screen="settings"; render(); };
+    wrap.appendChild(settingsCard);
+    settingsCard.querySelector('#openSettings').onclick = () => { state.screen="settings"; renderUI(); };
 
-    const startCard = el(`
-      <div class="card">
-        <button class="btn-primary" id="startBtn" style="width:100%;" ${canStart?'':'disabled'}>Start round</button>
-        ${canStart ? '' : '<p class="small" style="margin-top:8px;">Need at least 3 players to start.</p>'}
-      </div>
-    `);
+    const startCard = el(`<div class="card"><button class="btn-primary" id="startBtn" style="width:100%;" ${canStart?'':'disabled'}>Start round</button>
+      ${canStart?'':'<p class="small" style="margin-top:8px;">Need at least 2 players.</p>'}</div>`);
     startCard.querySelector('#startBtn').onclick = () => { if(canStart) startRound(); };
     wrap.appendChild(startCard);
-
   } else {
-    // JOINER VIEW — read-only, waiting on host
-    const waitCard = el(`
-      <div class="card center" style="padding:30px 18px;">
-        <div class="pulse-dot" style="margin:0 auto 14px;"></div>
-        <h2>Waiting for the host</h2>
-        <p class="muted" style="margin-top:8px;">${room.settings.chameleons} chameleon${room.settings.chameleons>1?'s':''} · ${Math.round(room.settings.discussSeconds/60)} min discussion</p>
-        <p class="small" style="margin-top:10px;">The host will start the round once everyone's in.</p>
-      </div>
-    `);
-    wrap.appendChild(waitCard);
+    wrap.appendChild(el(`<div class="card center" style="padding:30px 18px;">
+      <div class="pulse-dot"></div><h2>Waiting for the host</h2>
+      <p class="muted" style="margin-top:8px;">${room.settings.seekers} seeker${room.settings.seekers>1?'s':''} · ${Math.round(room.settings.roundSeconds/60*10)/10} min round</p>
+    </div>`));
   }
-
   return wrap;
 }
 
@@ -464,212 +320,79 @@ function renderLobby(){
 function renderSettings(){
   const room = state.room;
   const wrap = el(`<div></div>`);
-
-  const ruleCard = el(`
+  const card = el(`
     <div class="card">
       <h2>Rules</h2>
-      <label>Number of chameleons</label>
-      <input type="number" min="1" max="3" id="chamCount" value="${room.settings.chameleons}" />
-      <label>Discussion time (seconds)</label>
-      <input type="number" min="30" step="15" id="discussTime" value="${room.settings.discussSeconds}" />
-      <button class="btn-ghost" id="saveRules" style="width:100%;margin-top:14px;">Save rules</button>
+      <label>Number of seekers</label>
+      <input type="number" min="1" max="3" id="seekerCount" value="${room.settings.seekers}" />
+      <label>Round length (seconds)</label>
+      <input type="number" min="30" step="15" id="roundLen" value="${room.settings.roundSeconds}" />
+      <button class="btn-primary" id="saveBtn" style="width:100%;margin-top:14px;">Save</button>
     </div>
   `);
-  ruleCard.querySelector('#saveRules').onclick = () => {
-    room.settings.chameleons = Math.max(1, parseInt(ruleCard.querySelector('#chamCount').value)||1);
-    room.settings.discussSeconds = Math.max(30, parseInt(ruleCard.querySelector('#discussTime').value)||180);
-    syncRoom();
+  card.querySelector('#saveBtn').onclick = () => {
+    room.settings.seekers = Math.max(1, parseInt(card.querySelector('#seekerCount').value)||1);
+    room.settings.roundSeconds = Math.max(30, parseInt(card.querySelector('#roundLen').value)||90);
+    pushRoom(); state.screen="lobby"; renderUI();
   };
-  wrap.appendChild(ruleCard);
-
-  const catCard = el(`<div class="card"><h2>Category packs</h2><div id="catChips"></div></div>`);
-  const chipsHolder = catCard.querySelector('#catChips');
-  function redrawChips(){
-    chipsHolder.innerHTML = "";
-    Object.keys(room.pack).forEach(cat=>{
-      const active = room.activeCategories.includes(cat);
-      const chip = el(`<span class="catchip" style="${active?'border-color:var(--acid-dim);':'opacity:0.5;'}">${cat} (${room.pack[cat].length}) <button data-cat="${cat}" class="toggleCat">${active?'on':'off'}</button> <button data-cat="${cat}" class="delCat">✕</button></span>`);
-      chipsHolder.appendChild(chip);
-    });
-    chipsHolder.querySelectorAll('.toggleCat').forEach(b=>{
-      b.onclick = ()=>{
-        const cat = b.dataset.cat;
-        const idx = room.activeCategories.indexOf(cat);
-        if(idx>=0) room.activeCategories.splice(idx,1); else room.activeCategories.push(cat);
-        syncRoom(); redrawChips();
-      };
-    });
-    chipsHolder.querySelectorAll('.delCat').forEach(b=>{
-      b.onclick = ()=>{
-        const cat = b.dataset.cat;
-        delete room.pack[cat];
-        room.activeCategories = room.activeCategories.filter(c=>c!==cat);
-        syncRoom(); redrawChips();
-      };
-    });
-  }
-  redrawChips();
-  wrap.appendChild(catCard);
-
-  const addCard = el(`
-    <div class="card">
-      <h2>Add or edit a category</h2>
-      <label>Category name</label>
-      <input type="text" id="newCatName" placeholder="e.g. Office Supplies" />
-      <label>Words (one per line, 6+ recommended)</label>
-      <textarea id="newCatWords" placeholder="Stapler&#10;Paperclip&#10;Sticky note"></textarea>
-      <button class="btn-primary" id="saveCat" style="width:100%;margin-top:14px;">Save category</button>
-      <p class="small" style="margin-top:8px;">Tip: typing an existing category name overwrites its word list.</p>
-    </div>
-  `);
-  addCard.querySelector('#saveCat').onclick = () => {
-    const name = addCard.querySelector('#newCatName').value.trim();
-    const words = addCard.querySelector('#newCatWords').value.split('\n').map(w=>w.trim()).filter(Boolean);
-    if(!name || words.length<2){ alert("Give it a name and at least 2 words."); return; }
-    room.pack[name] = words;
-    if(!room.activeCategories.includes(name)) room.activeCategories.push(name);
-    syncRoom();
-    addCard.querySelector('#newCatName').value = "";
-    addCard.querySelector('#newCatWords').value = "";
-    redrawChips();
-  };
-  wrap.appendChild(addCard);
-
-  const back = el(`<div class="card"><button class="btn-ghost" id="backLobby" style="width:100%;">← Back to lobby</button></div>`);
-  back.querySelector('#backLobby').onclick = () => { state.screen="lobby"; render(); };
+  wrap.appendChild(card);
+  const back = el(`<div class="card"><button class="btn-ghost" id="backLobby" style="width:100%;">← Back</button></div>`);
+  back.querySelector('#backLobby').onclick = () => { state.screen="lobby"; renderUI(); };
   wrap.appendChild(back);
-
   return wrap;
 }
 
-/* ---- REVEAL ---- */
-function buildGridHTML(round, isChameleon){
-  const cells = round.grid.map(w=>{
-    const isSecret = !isChameleon && w === round.word;
-    return `<div class="gridcell ${isSecret ? 'secret' : ''}">${w}</div>`;
-  }).join('');
-  const footer = isChameleon
-    ? `<div class="hint" style="margin-top:14px;color:var(--danger);">CATEGORY: ${round.category.toUpperCase()} — you're the chameleon. You don't know which word is real.</div>`
-    : `<div class="hint" style="margin-top:14px;">CATEGORY: ${round.category.toUpperCase()} — the highlighted word is the secret.</div>`;
-  return `<div class="wordgrid">${cells}</div>${footer}`;
-}
-function renderReveal(){
+/* ---- PREP (color + pose + placement) ---- */
+function renderPrep(){
   const room = state.room;
+  const me = room.players[state.playerId];
+  const isSeeker = me.role === "seeker";
   const wrap = el(`<div></div>`);
 
-  if(state.mode === "online"){
-    const isChameleon = room.round.chameleonIds.includes(state.playerId);
-    const box = el(`
+  if(isSeeker){
+    wrap.appendChild(el(`<div class="card center"><h2>You're the seeker</h2>
+      <p class="muted">Everyone else is painting themselves to blend into the room. Sit tight — you'll drop in once prep ends.</p>
+      <div class="timer" id="prepTimer">--</div></div>`));
+  } else {
+    const card = el(`
       <div class="card">
-        <h2>The board</h2>
-        <div class="reveal-box" id="revealBox">
-          <div class="hint">${state.myRevealOpen ? "tap to hide" : "tap to reveal — keep it secret"}</div>
+        <h2>Pick your camouflage</h2>
+        <p class="muted">Sample a color from the room, then choose a pose. You'll place yourself in the 3D room next.</p>
+        <div class="swatch-grid" id="swatchGrid"></div>
+        <label>Pose</label>
+        <div class="pose-row" id="poseRow">
+          <div class="pose-btn" data-pose="stand">Stand</div>
+          <div class="pose-btn" data-pose="crouch">Crouch</div>
+          <div class="pose-btn" data-pose="lie">Lie down</div>
         </div>
+        <button class="btn-primary" id="enterPrep" style="width:100%;margin-top:16px;">Enter the room</button>
       </div>
     `);
-    const rb = box.querySelector('#revealBox');
-    function paint(){
-      if(state.myRevealOpen){
-        rb.innerHTML = buildGridHTML(room.round, isChameleon);
-      }else{
-        rb.innerHTML = `<div class="hint">tap to reveal — keep it secret</div>`;
-      }
-    }
-    paint();
-    rb.onclick = ()=>{ state.myRevealOpen = !state.myRevealOpen; paint(); };
-    wrap.appendChild(box);
-
-    const readyCard = el(`<div class="card"><p class="muted">Once everyone has secretly checked the board, the host starts discussion.</p>${state.isHost?'<button class="btn-primary" id="goDiscuss" style="width:100%;">Start discussion</button>':'<p class="small">Waiting for host…</p>'}</div>`);
-    if(state.isHost) readyCard.querySelector('#goDiscuss').onclick = beginDiscussion;
-    wrap.appendChild(readyCard);
-
-  } else {
-    const idx = state.localRevealIndex;
-    const players = room.players;
-    if(idx >= players.length){
-      const ready = el(`<div class="card center"><h2>Everyone's seen their card</h2><button class="btn-primary" id="goDiscuss" style="width:100%;margin-top:10px;">Start discussion</button></div>`);
-      ready.querySelector('#goDiscuss').onclick = beginDiscussion;
-      wrap.appendChild(ready);
-    } else {
-      const p = players[idx];
-      const isChameleon = room.round.chameleonIds.includes(p.id);
-      const box = el(`
-        <div class="card">
-          <h2>Pass to: ${p.name}</h2>
-          <div class="reveal-box" id="revealBox"><div class="hint">tap to reveal the board</div></div>
-        </div>
-      `);
-      const rb = box.querySelector('#revealBox');
-      let opened = false;
-      rb.onclick = ()=>{
-        opened = !opened;
-        rb.innerHTML = opened ? buildGridHTML(room.round, isChameleon) : `<div class="hint">tap to reveal the board</div>`;
-      };
-      wrap.appendChild(box);
-      const nextBtn = el(`<div class="card"><button class="btn-primary" id="nextPlayer" style="width:100%;">Got it — next player</button></div>`);
-      nextBtn.querySelector('#nextPlayer').onclick = () => { state.localRevealIndex++; render(); };
-      wrap.appendChild(nextBtn);
-    }
+    const grid = card.querySelector('#swatchGrid');
+    PALETTE.forEach(p=>{
+      const sw = el(`<div class="swatch" title="${p.name}" style="background:#${p.hex.toString(16).padStart(6,'0')};"></div>`);
+      if(p.hex === state.prepColor) sw.classList.add('selected');
+      sw.onclick = () => { grid.querySelectorAll('.swatch').forEach(s=>s.classList.remove('selected')); sw.classList.add('selected'); state.prepColor = p.hex; };
+      grid.appendChild(sw);
+    });
+    card.querySelectorAll('.pose-btn').forEach(b=>{
+      if(b.dataset.pose === state.prepPose) b.classList.add('selected');
+      b.onclick = () => { card.querySelectorAll('.pose-btn').forEach(x=>x.classList.remove('selected')); b.classList.add('selected'); state.prepPose = b.dataset.pose; };
+    });
+    card.querySelector('#enterPrep').onclick = () => {
+      me.color = state.prepColor; me.pose = state.prepPose;
+      pushRoom();
+      enterGame();
+    };
+    wrap.appendChild(card);
   }
-
-  return wrap;
-}
-
-/* ---- DISCUSS ---- */
-let discussTickHandle = null;
-function renderDiscuss(){
-  const room = state.room;
-  const wrap = el(`<div></div>`);
-  const elapsed = Math.floor((Date.now() - room.timerStart)/1000);
-  const remaining = Math.max(0, room.round.discussSeconds - elapsed);
-  const mm = String(Math.floor(remaining/60)).padStart(2,'0');
-  const ss = String(remaining%60).padStart(2,'0');
-
-  const card = el(`
-    <div class="card center">
-      <h2>Discuss</h2>
-      <p class="muted">Talk through the category and word. Everyone tries to spot who's faking it.</p>
-      <div class="timer" id="timerDisplay">${mm}:${ss}</div>
-      <button class="btn-primary" id="goVote" style="width:100%;margin-top:18px;">Move to vote</button>
-    </div>
-  `);
-  card.querySelector('#goVote').onclick = () => { room.phase = "vote"; syncRoom(); };
-  wrap.appendChild(card);
-
-  clearInterval(discussTickHandle);
-  discussTickHandle = setInterval(()=>{
-    if(!state.room || state.room.phase !== "discuss"){ clearInterval(discussTickHandle); return; }
-    const e2 = Math.floor((Date.now()-state.room.timerStart)/1000);
-    const r2 = Math.max(0, state.room.round.discussSeconds - e2);
-    const m2 = String(Math.floor(r2/60)).padStart(2,'0');
-    const s2 = String(r2%60).padStart(2,'0');
-    const disp = document.getElementById('timerDisplay');
-    if(disp) disp.textContent = m2+":"+s2;
-    if(r2<=0){ clearInterval(discussTickHandle); }
-  }, 1000);
-
-  return wrap;
-}
-
-/* ---- VOTE ---- */
-function renderVote(){
-  const room = state.room;
-  const wrap = el(`<div></div>`);
-  const card = el(`<div class="card"><h2>Who's the chameleon?</h2><div id="voteList"></div></div>`);
-  const list = card.querySelector('#voteList');
-  room.players.forEach(p=>{
-    const selected = state.selectedVote === p.id;
-    const opt = el(`<div class="voteopt ${selected?'selected':''}"><span>${p.name}</span><span class="small">${selected?'✓ your vote':''}</span></div>`);
-    opt.onclick = () => castVote(p.id);
-    list.appendChild(opt);
-  });
-  wrap.appendChild(card);
-
-  if(state.isHost || state.mode==="local"){
-    const tallyCard = el(`<div class="card"><p class="muted">${Object.keys(room.votes).length} of ${room.players.length} votes in.</p><button class="btn-primary" id="reveal" style="width:100%;">Reveal result</button></div>`);
-    tallyCard.querySelector('#reveal').onclick = tallyAndReveal;
-    wrap.appendChild(tallyCard);
-  }
+  const tick = setInterval(()=>{
+    if(!state.room || state.room.phase!=="prep"){ clearInterval(tick); return; }
+    const remain = Math.max(0, Math.round((state.room.prepUntil - Date.now())/1000));
+    const d = document.getElementById('prepTimer');
+    if(d) d.textContent = remain + "s";
+    if(remain<=0){ clearInterval(tick); }
+  }, 500);
   return wrap;
 }
 
@@ -677,35 +400,345 @@ function renderVote(){
 function renderResult(){
   const room = state.room;
   const wrap = el(`<div></div>`);
-  const accusedId = room.lastResult.accusedId;
-  const accused = room.players.find(p=>p.id===accusedId);
-  const chameleons = room.players.filter(p=>room.round.chameleonIds.includes(p.id));
-  const caughtChameleon = chameleons.some(c=>c.id===accusedId);
+  const ids = Object.keys(room.players);
+  const hiders = ids.filter(id=>room.players[id].role==="hider");
+  const survivors = hiders.filter(id=>!room.players[id].caught);
+  const hidersWin = survivors.length > 0;
 
-  const banner = el(`<div class="result-banner ${caughtChameleon?'result-win':'result-lose'}">
-    ${caughtChameleon ? "Caught! 🦎" : "The chameleon got away"}
+  wrap.appendChild(el(`<div class="result-banner ${hidersWin?'result-win':'result-lose'}">
+    ${hidersWin ? "Hiders win! 🦎" : "Seekers win!"}
+  </div>`));
+
+  const info = el(`<div class="card">
+    <p class="muted">${survivors.length} of ${hiders.length} hiders made it to the end.</p>
+    <ul class="playerlist" id="resultList"></ul>
   </div>`);
-  wrap.appendChild(banner);
-
-  const info = el(`
-    <div class="card">
-      <p class="muted">Group voted out: <strong>${accused?accused.name:'no one'}</strong></p>
-      <p class="muted">The chameleon${chameleons.length>1?'s were':' was'}: <strong>${chameleons.map(c=>c.name).join(', ')}</strong></p>
-      <p class="muted">Secret word was <strong>${room.round.word}</strong> (category: ${room.round.category}).</p>
-      ${caughtChameleon ? `<p class="muted" style="margin-top:8px;">House rule reminder: if you caught them, give the chameleon one guess at the word before locking in the win.</p>` : ''}
-    </div>
-  `);
+  const list = info.querySelector('#resultList');
+  ids.forEach(id=>{
+    const p = room.players[id];
+    if(p.role!=="hider") return;
+    list.appendChild(el(`<li><span><span class="dot ${p.caught?'caught':''}"></span>${p.name}</span><span class="small">${p.caught?'caught':'survived'}</span></li>`));
+  });
   wrap.appendChild(info);
 
-  const again = el(`<div class="card"><button class="btn-primary" id="again" style="width:100%;">Next round</button></div>`);
-  again.querySelector('#again').onclick = () => { state.localRevealIndex = 0; newRound(); };
-  wrap.appendChild(again);
-
+  if(state.isHost){
+    const again = el(`<div class="card"><button class="btn-primary" id="again" style="width:100%;">Next round</button></div>`);
+    again.querySelector('#again').onclick = () => {
+      const ids2 = Object.keys(room.players);
+      ids2.forEach(id=>{ room.players[id].role=null; room.players[id].caught=false; });
+      room.phase = "lobby";
+      pushRoom();
+    };
+    wrap.appendChild(again);
+  } else {
+    wrap.appendChild(el(`<div class="card center"><p class="small">Waiting for host to start another round…</p></div>`));
+  }
   return wrap;
 }
 
+/* ============== GAME FLOW ============== */
+function startRound(){
+  const room = state.room;
+  const ids = Object.keys(room.players);
+  const n = Math.min(room.settings.seekers, Math.max(1, ids.length-1));
+  const shuffled = [...ids].sort(()=>Math.random()-0.5);
+  const seekerIds = shuffled.slice(0,n);
+  ids.forEach(id=>{
+    const isSeeker = seekerIds.includes(id);
+    room.players[id].role = isSeeker ? "seeker" : "hider";
+    room.players[id].caught = false;
+    room.players[id].color = PALETTE[8].hex;
+    room.players[id].pose = "stand";
+    // scatter starting positions a bit so people aren't stacked
+    room.players[id].x = (Math.random()-0.5)*ROOM_SIZE*0.6;
+    room.players[id].z = (Math.random()-0.5)*ROOM_SIZE*0.6;
+    room.players[id].y = 0;
+    room.players[id].yaw = 0;
+  });
+  room.phase = "prep";
+  room.prepUntil = Date.now() + 20000; // 20s to paint & place
+  room.seekUntil = null;
+  pushRoom();
+  state.screen="lobby"; // will be overridden by phase routing
+  renderUI();
+
+  // host watches the prep timer and flips to seek phase
+  if(state.isHost){
+    setTimeout(()=>{ if(state.room && state.room.phase==="prep"){ state.room.phase="seek"; state.room.seekUntil = Date.now()+room.settings.roundSeconds*1000; pushRoom(); } }, 20300);
+  }
+}
+
+function checkRoundEnd(){
+  const room = state.room;
+  if(!room || room.phase!=="seek") return;
+  const ids = Object.keys(room.players);
+  const hiders = ids.filter(id=>room.players[id].role==="hider");
+  const allCaught = hiders.length>0 && hiders.every(id=>room.players[id].caught);
+  const timeUp = room.seekUntil && Date.now() >= room.seekUntil;
+  if(allCaught || timeUp){
+    room.phase = "result";
+    pushRoom();
+  }
+}
+
+/* ============== 3D GAME ============== */
+const game = {
+  active:false, scene:null, camera:null, renderer:null,
+  myMesh:null, otherMeshes:{}, raycaster:null,
+  keys:{}, yaw:0, pitch:0,
+  netTimer:null
+};
+
+function buildScene(){
+  const THREE_ = THREE;
+  const scene = new THREE_.Scene();
+  scene.background = new THREE_.Color(0x10140f);
+  scene.fog = new THREE_.Fog(0x10140f, 18, 40);
+
+  const ambient = new THREE_.AmbientLight(0xffffff, 0.55);
+  scene.add(ambient);
+  const sun = new THREE_.DirectionalLight(0xffffff, 0.8);
+  sun.position.set(10,20,8);
+  scene.add(sun);
+
+  // floor
+  const floorMat = new THREE_.MeshStandardMaterial({color:0x8b8d86});
+  const floor = new THREE_.Mesh(new THREE_.PlaneGeometry(ROOM_SIZE,ROOM_SIZE), floorMat);
+  floor.rotation.x = -Math.PI/2;
+  scene.add(floor);
+
+  // walls (N,S,E,W each a different color)
+  const wallDefs = [
+    {hex:0xb5453b, x:0, z:-ROOM_SIZE/2, rotY:0},
+    {hex:0x3b5b8c, x:0, z: ROOM_SIZE/2, rotY:Math.PI},
+    {hex:0x4f7a4a, x:-ROOM_SIZE/2, z:0, rotY:Math.PI/2},
+    {hex:0xc9a96b, x: ROOM_SIZE/2, z:0, rotY:-Math.PI/2},
+  ];
+  wallDefs.forEach(w=>{
+    const mat = new THREE_.MeshStandardMaterial({color:w.hex});
+    const wall = new THREE_.Mesh(new THREE_.PlaneGeometry(ROOM_SIZE, WALL_HEIGHT), mat);
+    wall.position.set(w.x, WALL_HEIGHT/2, w.z);
+    wall.rotation.y = w.rotY;
+    scene.add(wall);
+  });
+
+  // props (crates to hide near/behind)
+  PROPS.forEach(p=>{
+    const mat = new THREE_.MeshStandardMaterial({color:p.hex});
+    const box = new THREE_.Mesh(new THREE_.BoxGeometry(p.s,p.s,p.s), mat);
+    box.position.set(p.x, p.s/2, p.z);
+    scene.add(box);
+  });
+
+  return scene;
+}
+
+function makeAvatarMesh(colorHex, pose){
+  const group = new THREE.Group();
+  const mat = new THREE.MeshStandardMaterial({color:colorHex});
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(0.45,0.45,1.3,12), mat);
+  body.position.y = 0.95;
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.4,12,12), mat);
+  head.position.y = 1.85;
+  group.add(body); group.add(head);
+  applyPoseToGroup(group, pose);
+  return group;
+}
+function applyPoseToGroup(group, pose){
+  if(pose === "crouch"){
+    group.scale.set(1,0.55,1);
+  } else if(pose === "lie"){
+    group.rotation.x = Math.PI/2;
+    group.position.y = 0.45;
+  } else {
+    group.scale.set(1,1,1);
+    group.rotation.x = 0;
+    group.position.y = 0;
+  }
+}
+
+function enterGame(){
+  state.screen = "ingame";
+  renderUI();
+  setupGameDOM();
+  if(!game.active){
+    initThree();
+  }
+  game.active = true;
+  document.getElementById('exitBtn').style.display = "block";
+  game.netTimer = setInterval(networkTick, 250);
+  requestAnimationFrame(gameLoop);
+}
+
+function leaveGame(){
+  game.active = false;
+  clearInterval(game.netTimer);
+  document.getElementById('exitBtn').style.display = "none";
+  state.screen = "lobby";
+  renderUI();
+}
+
+function setupGameDOM(){
+  document.getElementById('exitBtn').onclick = () => { document.exitPointerLock && document.exitPointerLock(); leaveGame(); };
+  const overlay = document.getElementById('clickToPlay');
+  const canvas = document.getElementById('gameCanvas');
+  overlay.style.display = "flex";
+  overlay.onclick = () => { canvas.requestPointerLock(); };
+  document.addEventListener('pointerlockchange', ()=>{
+    overlay.style.display = document.pointerLockElement === canvas ? "none" : "flex";
+  });
+}
+
+function initThree(){
+  const canvas = document.getElementById('gameCanvas');
+  game.renderer = new THREE.WebGLRenderer({canvas, antialias:true});
+  game.renderer.setSize(window.innerWidth, window.innerHeight);
+  window.addEventListener('resize', ()=>{
+    game.renderer.setSize(window.innerWidth, window.innerHeight);
+    game.camera.aspect = window.innerWidth/window.innerHeight;
+    game.camera.updateProjectionMatrix();
+  });
+
+  game.scene = buildScene();
+  game.camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 100);
+  game.raycaster = new THREE.Raycaster();
+
+  document.addEventListener('keydown', e=>{ game.keys[e.code]=true; });
+  document.addEventListener('keyup', e=>{ game.keys[e.code]=false; });
+  document.addEventListener('mousemove', e=>{
+    if(document.pointerLockElement !== document.getElementById('gameCanvas')) return;
+    game.yaw -= e.movementX * 0.0022;
+    game.pitch -= e.movementY * 0.0022;
+    game.pitch = Math.max(-1.2, Math.min(1.2, game.pitch));
+  });
+  document.getElementById('gameCanvas').addEventListener('click', ()=>{
+    if(document.pointerLockElement !== document.getElementById('gameCanvas')) return;
+    tryTag();
+  });
+}
+
+function gameLoop(){
+  if(!game.active) return;
+  const room = state.room;
+  const me = room.players[state.playerId];
+  const isSeeker = me.role === "seeker";
+  const phase = room.phase;
+
+  document.getElementById('hudRole').textContent = isSeeker ? "SEEKER — find & click hiders" : "HIDDEN — hold still";
+  let timerLabel = "--:--";
+  if(phase==="seek" && room.seekUntil){
+    const remain = Math.max(0, Math.round((room.seekUntil - Date.now())/1000));
+    timerLabel = String(Math.floor(remain/60)).padStart(2,'0')+":"+String(remain%60).padStart(2,'0');
+    if(remain<=0) checkRoundEnd();
+  } else if(phase==="prep"){
+    timerLabel = "prep";
+  }
+  document.getElementById('hudTimer').textContent = timerLabel;
+
+  if(phase === "result"){
+    leaveGame();
+    return;
+  }
+
+  if(isSeeker && phase==="seek"){
+    // free movement
+    const speed = 0.14;
+    const fwd = new THREE.Vector3(Math.sin(game.yaw), 0, Math.cos(game.yaw));
+    const right = new THREE.Vector3(Math.sin(game.yaw+Math.PI/2), 0, Math.cos(game.yaw+Math.PI/2));
+    let move = new THREE.Vector3();
+    if(game.keys['KeyW']) move.add(fwd);
+    if(game.keys['KeyS']) move.sub(fwd);
+    if(game.keys['KeyD']) move.add(right);
+    if(game.keys['KeyA']) move.sub(right);
+    if(move.lengthSq()>0){ move.normalize().multiplyScalar(speed); game.camera.position.add(move); }
+    const bound = ROOM_SIZE/2 - 1;
+    game.camera.position.x = Math.max(-bound, Math.min(bound, game.camera.position.x));
+    game.camera.position.z = Math.max(-bound, Math.min(bound, game.camera.position.z));
+    game.camera.position.y = 1.7;
+
+    me.x = game.camera.position.x; me.z = game.camera.position.z; me.yaw = game.yaw;
+  } else {
+    // hiders / pre-seek: fixed external view of own spot
+    game.camera.position.set(me.x, 3.2, me.z+4.5);
+    game.camera.lookAt(me.x, 1, me.z);
+  }
+
+  game.camera.rotation.order = "YXZ";
+  if(isSeeker && phase==="seek"){
+    game.camera.rotation.y = game.yaw;
+    game.camera.rotation.x = game.pitch;
+  }
+
+  renderOtherPlayers();
+  game.renderer.render(game.scene, game.camera);
+  requestAnimationFrame(gameLoop);
+}
+
+function renderOtherPlayers(){
+  const room = state.room;
+  const ids = Object.keys(room.players);
+  ids.forEach(id=>{
+    if(id === state.playerId) return;
+    const p = room.players[id];
+    if(p.caught && room.phase==="seek"){
+      if(game.otherMeshes[id]){ game.scene.remove(game.otherMeshes[id]); delete game.otherMeshes[id]; }
+      return;
+    }
+    if(!game.otherMeshes[id]){
+      game.otherMeshes[id] = makeAvatarMesh(p.color, p.pose);
+      game.scene.add(game.otherMeshes[id]);
+    }
+    const mesh = game.otherMeshes[id];
+    mesh.position.x = p.x; mesh.position.z = p.z;
+    mesh.rotation.y = p.yaw || 0;
+    mesh.userData.playerId = id;
+    // keep pose/color in sync if changed
+    mesh.children.forEach(c=>{ if(c.material.color.getHex() !== p.color) c.material.color.setHex(p.color); });
+  });
+  // remove stale meshes for players no longer present
+  Object.keys(game.otherMeshes).forEach(id=>{
+    if(!room.players[id]){ game.scene.remove(game.otherMeshes[id]); delete game.otherMeshes[id]; }
+  });
+}
+
+function tryTag(){
+  const room = state.room;
+  const me = room.players[state.playerId];
+  if(me.role !== "seeker" || room.phase !== "seek") return;
+  game.raycaster.setFromCamera({x:0,y:0}, game.camera);
+  const targets = Object.values(game.otherMeshes);
+  const hits = game.raycaster.intersectObjects(targets, true);
+  if(hits.length === 0) return;
+  let hitGroup = hits[0].object;
+  while(hitGroup.parent && !hitGroup.userData.playerId) hitGroup = hitGroup.parent;
+  const targetId = hitGroup.userData.playerId;
+  if(!targetId) return;
+  const dist = game.camera.position.distanceTo(hitGroup.position);
+  if(dist > 9) return; // out of tagging range
+  const target = room.players[targetId];
+  if(!target || target.role !== "hider" || target.caught) return;
+  target.caught = true;
+  pushRoom();
+  checkRoundEnd();
+}
+
+function networkTick(){
+  pullRoom();
+  pushRoom();
+}
+
+/* ============== ROUTING HELPERS ============== */
+function maybeEnterFromPhase(){
+  if(!state.room) return;
+  const me = state.room.players[state.playerId];
+  if(!me) return;
+  if(state.room.phase === "seek" && state.screen !== "ingame"){
+    enterGame();
+  }
+}
+
 /* ============== INIT ============== */
-render();
+renderUI();
 </script>
 </body>
 </html>
